@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resistenza elettrica e caratteristiche del conduttore</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="wrap"><h1>Resistenza elettrica e caratteristiche del conduttore</h1><p>Laboratorio guidato: misura → elaborazione → grafici → modello fisico</p></div></header>
+<nav><div class="steps" id="stepNav"></div></nav>
+<main>
+  <section class="panel active" data-step="0">
+    <div class="card">
+      <h2>1. Identificazione e preparazione</h2>
+      <p class="lead">Inserisci i dati del gruppo. Durante la fase sperimentale registra solo le grandezze misurate; l'app calcolerà la resistenza soltanto dopo il controllo dei dati.</p>
+      <div class="grid3">
+        <div><label>Classe</label><input id="classe" placeholder="es. 4TRED"></div>
+        <div><label>Gruppo</label><input id="gruppo" placeholder="es. G2"></div>
+        <div><label>Componenti</label><input id="nomi" placeholder="Cognome Nome; Cognome Nome"></div>
+      </div>
+      <h3>Materiali e configurazioni</h3>
+      <div class="grid3">
+        <div class="note"><b>Costantana</b><br><span class="mini">Lega Cu–Ni. Nella prova di riferimento con L = 1,000 m e A = 0,1 mm² è già noto R<sub>medio</sub> = (6,0 ± 0,2) Ω.</span></div>
+        <div class="note"><b>Nichel-cromo</b><br><span class="mini">Lega Ni–Cr. Nel confronto tra materiali si useranno 1,0 V, 2,0 V e 3,0 V.</span></div>
+        <div class="note"><b>Ottone</b><br><span class="mini">Lega Cu–Zn. Per sicurezza non superare 2,0 V e interrompere l'alimentazione subito dopo la lettura.</span></div>
+      </div>
+      <div class="warning"><b>Convenzione adottata in questa esperienza.</b> L'incertezza deve avere <b>una sola cifra significativa</b>; il valore della misura deve terminare nella <b>stessa posizione decimale</b>. Esempio corretto: (1,20 ± 0,05) V. L'app segnala automaticamente formati incoerenti.</div>
+      <div class="note no-print"><b>Postazione condivisa?</b> Se questo computer è stato usato da un altro gruppo, cancella prima la sessione salvata. <button class="ghost" type="button" style="margin-left:8px" onclick="resetSession()">Nuovo gruppo / cancella dati</button></div>
+      <label><input type="checkbox" id="ready" style="width:auto"> Ho controllato collegamenti, fondo scala degli strumenti e posizione iniziale del reostato.</label>
+      <div class="actions"><span></span><div class="right"><button class="primary" onclick="goNext()">Inizia raccolta dati</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="1">
+    <div class="card">
+      <h2>2. Raccolta dati — variazione della lunghezza</h2>
+      <p class="lead">Costantana, A = 0,1 mm². Il caso L = 1,000 m proviene dall'esperienza Ohm I e non va misurato di nuovo.</p>
+      <div class="fixed note"><b>Dato già disponibile:</b> L = 1,000 m → R<sub>medio</sub> = (6,0 ± 0,2) Ω.</div>
+      <div id="table-length"></div>
+      <div id="check-length"></div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="ghost" onclick="validateDataset('length',true)">Controlla dati</button><button class="primary" onclick="nextIfDataset('length')">Prosegui</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="2">
+    <div class="card">
+      <h2>3. Raccolta dati — variazione della sezione</h2>
+      <p class="lead">Costantana, L = 1,000 m. Anche qui A = 0,1 mm² coincide con il caso già noto e non va rimisurato.</p>
+      <div class="fixed note"><b>Dato riutilizzato:</b> A = 0,1 mm² → R<sub>medio</sub> = (6,0 ± 0,2) Ω.</div>
+      <div id="table-area"></div>
+      <div id="check-area"></div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="ghost" onclick="validateDataset('area',true)">Controlla dati</button><button class="primary" onclick="nextIfDataset('area')">Prosegui</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="3">
+    <div class="card">
+      <h2>4. Raccolta dati — confronto tra materiali</h2>
+      <p class="lead">L = 1,000 m e A = 0,2 mm² per tutti i materiali.</p>
+      <div class="warning"><b>Sicurezza:</b> costantana e nichel-cromo fino a 3,0 V; ottone solo 1,0 V e 2,0 V. Dopo ogni lettura riporta la tensione a zero. Se l'ottone si scalda sensibilmente o la corrente è già molto elevata a 1,0 V, non eseguire la misura a 2,0 V e avvisa il docente.</div>
+      <div id="table-material"></div>
+      <label style="margin-top:8px"><input type="checkbox" id="skip-brass-2" style="width:auto"> Misura dell'ottone a 2,0 V non eseguita per sicurezza.</label>
+      <div id="check-material"></div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="ghost" onclick="validateDataset('material',true)">Controlla dati</button><button class="primary" onclick="finishAcquisition()">Termina acquisizione</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="4">
+    <div class="card">
+      <h2>5. Elaborazione numerica</h2>
+      <p class="lead">Ora l'app calcola R = ΔV/I e propaga le incertezze. Gli errori di R vengono arrotondati a una sola cifra significativa e R viene scritto alla stessa posizione decimale.</p>
+      <div id="calc-warnings"></div>
+      <h3>B1 — Lunghezza</h3><div id="summary-length"></div>
+      <h3>B2 — Sezione</h3><div id="summary-area"></div>
+      <h3>B3 — Materiale</h3><div id="summary-material"></div>
+      <div class="note"><b>Controllo di coerenza:</b> se i valori di R ottenuti per la stessa configurazione non risultano compatibili entro le incertezze, l'app lo segnala. Prima di interpretare i grafici controlla eventuali anomalie di trascrizione o riscaldamento.</div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="primary" onclick="prepareGraphsAndNext()">Costruisci i grafici</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="5">
+    <div class="card">
+      <h2>6. Grafici sperimentali</h2>
+      <p class="lead">Osserva prima i soli dati sperimentali con le barre d'errore. Non è ancora mostrato alcun modello.</p>
+      <div class="grid2">
+        <div class="chart-wrap"><canvas id="chartLength" width="700" height="420"></canvas><div class="chart-caption">R<sub>medio</sub> in funzione di L. Barre verticali: ε(R<sub>medio</sub>).</div></div>
+        <div class="chart-wrap"><canvas id="chartArea" width="700" height="420"></canvas><div class="chart-caption">R<sub>medio</sub> in funzione di A. Barre verticali: ε(R<sub>medio</sub>).</div></div>
+      </div>
+      <div class="chart-wrap" style="margin-top:12px"><canvas id="chartMaterial" width="1000" height="360"></canvas><div class="chart-caption">Confronto tra materiali a L e A uguali.</div></div>
+      <div class="warning">Non tracciare ancora rette o curve “perché sai già la formula”. La fase successiva serve a dedurre l'andamento dai dati.</div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="primary" onclick="goNext()">Interpreta i grafici</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="6">
+    <div class="card">
+      <h2>7. Deduzione guidata degli andamenti</h2>
+      <h3>A. Dipendenza dalla lunghezza L</h3>
+      <p>Confronta R<sub>medio</sub> per 1 m, 2 m e 3 m. Quale descrizione è più coerente con i dati?</p>
+      <div class="choice" id="qL">
+        <label><input type="radio" name="ql" value="inv">R diminuisce quando L aumenta.</label>
+        <label><input type="radio" name="ql" value="direct">R aumenta circa nello stesso rapporto con cui aumenta L.</label>
+        <label><input type="radio" name="ql" value="none">R non dipende da L.</label>
+      </div>
+      <button class="ghost" onclick="checkLengthHypothesis()">Verifica ipotesi</button>
+      <div id="revealL" class="reveal success"><b>Conclusione supportata dai dati:</b><div class="formula">R ∝ L</div><button class="secondary no-print" onclick="overlayLengthModel()">Mostra ora il modello sul grafico</button></div>
+
+      <h3>B. Dipendenza dalla sezione A</h3>
+      <p>Quando la sezione aumenta, R diminuisce. Per distinguere una semplice diminuzione da una proporzionalità inversa, osserva il prodotto R·A.</p>
+      <div id="ra-products" class="note"></div>
+      <div class="choice" id="qA">
+        <label><input type="radio" name="qa" value="direct">R ∝ A</label>
+        <label><input type="radio" name="qa" value="inverse">R ∝ 1/A</label>
+        <label><input type="radio" name="qa" value="none">R è indipendente da A</label>
+      </div>
+      <button class="ghost" onclick="checkAreaHypothesis()">Verifica ipotesi</button>
+      <div id="revealA" class="reveal success"><b>Conclusione supportata dai dati:</b><div class="formula">R ∝ 1/A</div><button class="secondary no-print" onclick="overlayAreaModel()">Mostra ora il modello sul grafico</button></div>
+
+      <h3>C. Ruolo del materiale</h3>
+      <p>Nel terzo grafico L e A sono uguali. Che cosa resta come causa della differenza di R?</p>
+      <div class="choice">
+        <label><input type="radio" name="qm" value="material">Il materiale del conduttore.</label>
+        <label><input type="radio" name="qm" value="length">La lunghezza.</label>
+        <label><input type="radio" name="qm" value="area">La sezione.</label>
+      </div>
+      <button class="ghost" onclick="checkMaterialHypothesis()">Verifica ipotesi</button>
+      <div id="revealM" class="reveal success"><b>Conclusione:</b> a parità di geometria, materiali diversi presentano resistenze diverse. Possiamo quindi introdurre un <b>coefficiente caratteristico del materiale</b>, senza ancora assegnargli un nome.</div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button id="toModel" class="primary" onclick="goToModel()" disabled>Costruisci il modello</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="7">
+    <div class="card">
+      <h2>8. Costruzione del modello</h2>
+      <p class="lead">Combina ora, nell'ordine, le proporzionalità appena dedotte.</p>
+      <div class="grid2">
+        <div class="note"><b>1. Lunghezza</b><div class="formula">R ∝ L</div></div>
+        <div class="note"><b>2. Sezione</b><div class="formula">R ∝ 1/A</div></div>
+      </div>
+      <p>Se entrambe valgono contemporaneamente, quale forma geometrica deve comparire?</p>
+      <div class="choice">
+        <label><input type="radio" name="combine" value="LA">L·A</label>
+        <label><input type="radio" name="combine" value="LoverA">L/A</label>
+        <label><input type="radio" name="combine" value="AoverL">A/L</label>
+      </div>
+      <button class="ghost" onclick="checkCombine()">Verifica</button>
+      <div id="revealCombine" class="reveal success"><div class="formula">R ∝ L/A</div><p>La geometria da sola non basta: il confronto a L e A uguali mostra che serve un coefficiente specifico del materiale.</p><button class="primary no-print" onclick="introduceRho()">Introduci il coefficiente del materiale</button></div>
+      <div id="rhoBox" class="reveal note"><b>Nuovo concetto.</b> Il coefficiente caratteristico del materiale si chiama <b>resistività</b> e si indica con ρ. A temperatura fissata, ρ dipende dal materiale. Nel SI si misura in Ω·m.</div>
+      <div id="finalFormula" class="reveal"><p>Inserendo ρ nella proporzionalità geometrica si ottiene il modello completo:</p><div class="bigformula">R = ρ · L / A</div><div class="warning"><b>Attenzione alle unità:</b> nella relazione in unità SI, L va espressa in metri e A in m².</div></div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button id="toConclusion" class="primary" onclick="goNext()" disabled>Conclusioni</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-step="8">
+    <div class="card">
+      <h2>9. Conclusioni e relazione</h2>
+      <div class="grid2">
+        <div><label>Come devono essere i fili per minimizzare la resistenza nel trasporto della corrente?</label><textarea id="answer-wire" placeholder="Motiva usando L, A e il materiale."></textarea></div>
+        <div><label>Perché la resistenza può dipendere anche dalla temperatura?</label><textarea id="answer-temp" placeholder="Collega la risposta al comportamento microscopico o alla resistività."></textarea></div>
+      </div>
+      <div class="summary-kpi" id="final-kpi"></div>
+      <div class="note">La relazione generata conterrà dati misurati, incertezze, valori di R, grafici sperimentali e conclusioni. I grafici del report includono il modello solo dopo che è stato dedotto.</div>
+      <div class="actions"><button class="secondary" onclick="goPrev()">Indietro</button><div class="right"><button class="ghost" onclick="window.print()">Stampa / salva PDF</button><button class="primary" onclick="submitReport()">Consegna relazione</button></div></div>
+      <div id="submit-status"></div>
+    </div>
+  </section>
+</main>
+
+<script src="app-core.js"></script>
+<script src="app-ui.js"></script>
+</body>
+</html>
