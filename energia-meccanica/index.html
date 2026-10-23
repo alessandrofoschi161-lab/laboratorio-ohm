@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Laboratorio – Energia meccanica</title>
 <link rel="stylesheet" href="style.css">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -103,6 +104,7 @@
 <button class="primary" onclick="window.print()">Esporta relazione in PDF</button>
 <button class="secondary" onclick="csv()">Esporta dati CSV</button>
 <button class="primary" onclick="sendPDFToDrive()">Invia relazione PDF a Drive</button>
+<button class="secondary" onclick="testDriveUpload()">TEST invio Drive</button>
 <div id="sendStatus" class="feedback">Compila la relazione e, al termine, inviala direttamente alla cartella Drive del docente.</div></section>
 </main>
 
@@ -127,9 +129,116 @@ function fit(y){let sx=3,sy=y.reduce((a,b)=>a+b,0),sxy=y[1]+2*y[2],m=(3*sxy-sx*s
 function draw(){let D=S.data,N=['B','A','T'],C={Ec:'#2563eb',U:'#dc2626',G:'#16a34a',M:'#7c3aed'},ser=['Ec','U','G','M'],F=fit(N.map(p=>D[p].M.v));S.fit=F;let ym=0;N.forEach(p=>ser.forEach(s=>ym=Math.max(ym,D[p][s].v+D[p][s].e)));ym*=1.18;let W=900,H=470,L=75,R=25,Top=30,Bot=70,pw=W-L-R,ph=H-Top-Bot,x=i=>L+90+(pw-180)*i/2,y=v=>Top+ph*(1-v/ym),off={Ec:-24,U:-8,G:8,M:24};let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><line x1="${L}" y1="${Top}" x2="${L}" y2="${H-Bot}" stroke="#334155"/><line x1="${L}" y1="${H-Bot}" x2="${W-R}" y2="${H-Bot}" stroke="#334155"/>`;for(let i=0;i<=5;i++){let v=ym*i/5,yy=y(v);s+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e2e8f0"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="12">${v.toFixed(3)}</text>`}N.forEach((p,i)=>{s+=`<text x="${x(i)}" y="${H-Bot+25}" text-anchor="middle">${p}</text>`;ser.forEach(k=>{let d=D[p][k],xx=x(i)+off[k],yt=y(d.v+d.e),yb=y(Math.max(0,d.v-d.e)),yy=y(d.v),c=C[k];s+=`<line x1="${xx}" y1="${yt}" x2="${xx}" y2="${yb}" stroke="${c}" stroke-width="2"/><circle cx="${xx}" cy="${yy}" r="5" fill="${c}"/>`})});s+=`<line x1="${x(0)+24}" y1="${y(F.q)}" x2="${x(2)+24}" y2="${y(F.q+2*F.m)}" stroke="${C.M}" stroke-width="2.5" stroke-dasharray="8 6"/><text x="${W-R}" y="${Top+16}" text-anchor="end" font-size="12" fill="${C.M}">Best fit Em: m=${F.m.toExponential(2)} J/posizione</text><text x="${(L+W-R)/2}" y="${H-15}" text-anchor="middle">Posizioni della massa</text><text transform="translate(18 ${(Top+H-Bot)/2}) rotate(-90)" text-anchor="middle">Energia (J)</text></svg>`;$('chartWrap').innerHTML=s+`<div class="feedback">Una retta di best fit quasi orizzontale suggerisce costanza di Em; verifica anche la compatibilità delle barre di errore.</div>`}
 function assess(){if(!S.e){fb('afb',false,'Valida prima la tabella.');return}let I=['T','A','B'].map(p=>[S.data[p].M.v-S.data[p].M.e,S.data[p].M.v+S.data[p].M.e]),lo=Math.max(...I.map(x=>x[0])),hi=Math.min(...I.map(x=>x[1])),comp=lo<=hi,j=$('judge').value,ok=(j==='yes'&&comp)||(j==='no'&&!comp);fb('afb',ok,(comp?'Gli intervalli Em±ε(Em) hanno una zona comune: dati compatibili con la conservazione.':'Gli intervalli non hanno una zona comune: i dati non risultano compatibili con la conservazione.')+(S.fit?` Pendenza best fit: ${S.fit.m.toExponential(2)} J/posizione.`:''))}
 function csv(){let rows=[['Sezione','Campo','Valore','Unità'],['Identificazione','Nome',$('studentNames').value,''],['Identificazione','Classe',$('studentClass').value,''],['Identificazione','Gruppo',$('studentGroup').value,''],['Identificazione','Data',$('studentDate').value,'']];[['m','kg'],['em','kg'],['LE','m'],['eLE','m'],['Lx','m'],['eLx','m'],['dL','m'],['edL','m'],['P','N'],['eP','N'],['k','N/m'],['ek','N/m'],['tm','s'],['etm','s'],['T','s'],['eT','s'],['a','m'],['ea','m'],['vA','m/s'],['evA','m/s']].forEach(([id,u])=>rows.push(['Dati',id,$(id).value,u]));for(let p of ['T','A','B'])for(let q of ['x','ex','u','eu','v','ev','c','ec','h','eh','q','eq','M','eM']){let el=$(q+p);if(el)rows.push(['Energia',q+p,el.value,''])}let esc=v=>/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v,c=rows.map(r=>r.map(x=>esc(String(x??''))).join(';')).join('\n'),b=new Blob(['\ufeff'+c],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`energia_meccanica_${$('studentGroup').value||'gruppo'}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+
 const DRIVE_WEBAPP_URL="https://script.google.com/macros/s/AKfycbxeArhTIVLEn1uysWIxoH2zhYyHY-JTLeDVtTqSHLlZPjfH1zBhfJOqa8pm66m2_QOg/exec";
-function sanitizeFilePart(v){return String(v||'').trim().replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_')}
-async function makePDFBase64(){const {jsPDF}=window.jspdf,exportSection=$('exportSection'),oldDisplay=exportSection.style.display,buttons=[...document.querySelectorAll('button')],oldButtonDisplays=buttons.map(b=>b.style.display);exportSection.style.display='none';buttons.forEach(b=>b.style.display='none');try{const canvas=await html2canvas(document.body,{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:document.documentElement.scrollWidth});const imgData=canvas.toDataURL('image/jpeg',0.92),pdf=new jsPDF('p','mm','a4'),pageW=210,pageH=297,margin=8,usableW=pageW-2*margin,imgH=canvas.height*usableW/canvas.width;let offset=0;while(offset<imgH){if(offset>0)pdf.addPage();pdf.addImage(imgData,'JPEG',margin,margin-offset,usableW,imgH);offset+=pageH-2*margin}return pdf.output('datauristring').split(',')[1]}finally{exportSection.style.display=oldDisplay;buttons.forEach((b,i)=>b.style.display=oldButtonDisplays[i])}}
-async function sendPDFToDrive(){const status=$('sendStatus'),nome=$('studentNames').value.trim(),classe=$('studentClass').value.trim(),gruppo=$('studentGroup').value.trim(),data=$('studentDate').value.trim();if(!nome||!classe||!gruppo||!data){status.innerHTML='<span class="bad">Completa Nome/componenti, Classe, Gruppo e Data prima dell’invio.</span>';return}if(!S.e){status.innerHTML='<span class="bad">Prima valida la tabella delle energie.</span>';return}status.innerHTML='<span class="warn">Generazione del PDF e invio in corso…</span>';try{const pdfBase64=await makePDFBase64(),payload={nome,classe,gruppo,data,pdfBase64};await fetch(DRIVE_WEBAPP_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});status.innerHTML='<span class="ok">Relazione inviata.</span> Controlla la cartella Drive del docente per verificare la presenza del PDF.'}catch(err){console.error(err);status.innerHTML='<span class="bad">Invio non riuscito.</span> Controlla la connessione e riprova.'}}
+
+function sanitizeFilePart(v){
+  return String(v||'').trim().replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_');
+}
+
+async function makePDFBase64(){
+  const {jsPDF}=window.jspdf;
+  const exportSection=$('exportSection');
+  const oldDisplay=exportSection.style.display;
+  exportSection.style.display='none';
+  const buttons=[...document.querySelectorAll('button')];
+  const oldButtonDisplays=buttons.map(b=>b.style.display);
+  buttons.forEach(b=>b.style.display='none');
+
+  try{
+    const canvas=await html2canvas(document.body,{
+      scale:1.5,
+      useCORS:true,
+      backgroundColor:'#ffffff',
+      logging:false,
+      windowWidth:document.documentElement.scrollWidth
+    });
+
+    const imgData=canvas.toDataURL('image/jpeg',0.92);
+    const pdf=new jsPDF('p','mm','a4');
+    const pageW=210,pageH=297,margin=8;
+    const usableW=pageW-2*margin;
+    const imgH=canvas.height*usableW/canvas.width;
+    let offset=0;
+
+    while(offset<imgH){
+      if(offset>0) pdf.addPage();
+      pdf.addImage(imgData,'JPEG',margin,margin-offset,usableW,imgH);
+      offset+=pageH-2*margin;
+    }
+    return pdf.output('datauristring').split(',')[1];
+  } finally{
+    exportSection.style.display=oldDisplay;
+    buttons.forEach((b,i)=>b.style.display=oldButtonDisplays[i]);
+  }
+}
+
+async function sendPDFToDrive(){
+  const status=$('sendStatus');
+  const nome=$('studentNames').value.trim();
+  const classe=$('studentClass').value.trim();
+  const gruppo=$('studentGroup').value.trim();
+  const data=$('studentDate').value.trim();
+
+  if(!nome||!classe||!gruppo||!data){
+    status.innerHTML='<span class="bad">Completa Nome/componenti, Classe, Gruppo e Data prima dell’invio.</span>';
+    return;
+  }
+  if(!S.e){
+    status.innerHTML='<span class="bad">Prima valida la tabella delle energie.</span>';
+    return;
+  }
+
+  status.innerHTML='<span class="warn">Generazione del PDF e invio in corso…</span>';
+
+  try{
+    const pdfBase64=await makePDFBase64();
+    const payload={nome,classe,gruppo,data,pdfBase64};
+
+    await fetch(DRIVE_WEBAPP_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
+    });
+
+    status.innerHTML='<span class="ok">Relazione inviata.</span> Controlla la cartella Drive del docente per verificare la presenza del PDF.';
+  }catch(err){
+    console.error(err);
+    status.innerHTML='<span class="bad">Invio non riuscito.</span> Controlla la connessione e riprova.';
+  }
+}
+
+async function testDriveUpload(){
+  const status=$('sendStatus');
+  status.innerHTML='<span class="warn">Test automatico in corso…</span>';
+  try{
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    pdf.setFontSize(18);
+    pdf.text('TEST AUTOMATICO - Energia meccanica',20,30);
+    pdf.setFontSize(12);
+    pdf.text('Questo PDF verifica il collegamento GitHub Pages → Apps Script → Google Drive.',20,45,{maxWidth:170});
+    pdf.text('Data test: '+new Date().toLocaleString('it-IT'),20,65);
+    const pdfBase64=pdf.output('datauristring').split(',')[1];
+    const payload={
+      nome:'TEST_AUTOMATICO',
+      classe:'3TEST',
+      gruppo:'AUTO',
+      data:new Date().toISOString().slice(0,10),
+      pdfBase64
+    };
+    await fetch(DRIVE_WEBAPP_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
+    });
+    status.innerHTML='<span class="ok">Test inviato.</span> Cerca nella cartella Drive un file con nome simile a <b>Energia_meccanica_3TEST_AUTO_TEST_AUTOMATICO_...</b>.';
+  }catch(err){
+    console.error(err);
+    status.innerHTML='<span class="bad">Test non riuscito.</span> '+String(err);
+  }
+}
 </script>
 </body></html>
