@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratorio – Energia meccanica</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="header-inner">
+<h1>Laboratorio di fisica – Energia meccanica</h1>
+<p>Tutor investigativo autonomo</p>
+</div><div class="header-sep-light"></div><div class="header-sep-dark"></div><div class="header-sep-blue"></div></header>
+<main>
+<section class="identity-card"><h2>Identificazione del gruppo</h2><div class="identity-grid">
+<label>Nome / componenti<input id="studentNames"></label>
+<label>Classe<input id="studentClass"></label>
+<label>Gruppo<input id="studentGroup"></label>
+<label>Data<input id="studentDate" type="date"></label>
+</div></section>
+
+<section class="sheet"><h2>Riferimenti zero dell'esperienza</h2><div class="g2 grid">
+<div><b>Energia potenziale gravitazionale</b>
+<label class="choice"><input type="radio" name="zg" value="T"> quota zero in T</label>
+<label class="choice"><input type="radio" name="zg" value="A"> quota zero in A</label>
+<label class="choice"><input type="radio" name="zg" value="B"> quota zero in B</label></div>
+<div><b>Energia potenziale elastica</b>
+<label class="choice"><input type="radio" name="ze" value="E"> molla scarica E</label>
+<label class="choice"><input type="radio" name="ze" value="A"> posizione A</label>
+<label class="choice"><input type="radio" name="ze" value="B"> posizione B</label></div>
+</div><button class="primary" onclick="checkZeros()">Controlla riferimenti</button><div id="zeroFB" class="feedback">Scegli i due riferimenti.</div></section>
+
+<section class="sheet"><h2>1) Determinazione della costante elastica</h2>
+<div class="rule"><b>Regola:</b> errore assoluto con una sola cifra significativa; misura ed errore devono terminare alla stessa posizione decimale.</div>
+<div class="g4 grid">
+<label>m (kg)<input id="m" value="0.150"></label><label>ε(m)<input id="em" value="0.001"></label>
+<label>LE (m)<input id="LE"></label><label>ε(LE)<input id="eLE"></label>
+<label>Lx (m)<input id="Lx"></label><label>ε(Lx)<input id="eLx"></label>
+<label>ΔL (m)<input id="dL"></label><label>ε(ΔL)<input id="edL"></label>
+<label>P (N)<input id="P"></label><label>ε(P)<input id="eP"></label>
+<label>k (N/m)<input id="k"></label><label>ε(k)<input id="ek"></label>
+</div>
+<div class="g4 grid" style="margin-top:12px">
+<label>Per ΔL<select id="rDL"><option></option><option value="ok">ΔL=Lx−LE</option><option>ΔL=Lx+LE</option><option>ΔL=LE−Lx</option></select></label>
+<label>Per P<select id="rP"><option></option><option>P=m/g</option><option value="ok">P=m·g</option><option>P=g/m</option></select></label>
+<label>Per k<select id="rK"><option></option><option>k=P·ΔL</option><option value="ok">k=P/ΔL</option><option>k=ΔL/P</option></select></label>
+</div>
+<button class="primary" onclick="checkK()">Controlla il punto 1</button><div id="kfb" class="feedback"></div></section>
+
+<section class="sheet"><h2>2) Determinazione della velocità in A</h2>
+<table><thead><tr><th>Prova</th><th>T5 (s)</th><th>ε(T5) (s)</th></tr></thead><tbody id="tbtime"></tbody></table>
+<div class="g4 grid" style="margin-top:12px">
+<label>T5 medio<input id="tm"></label><label>ε(T5 medio)<input id="etm"></label>
+<label>T<input id="T"></label><label>ε(T)<input id="eT"></label>
+<label>a (m)<input id="a" value="0.100"></label><label>ε(a)<input id="ea" value="0.001"></label>
+<label>vA (m/s)<input id="vA"></label><label>ε(vA)<input id="evA"></label>
+</div>
+<div class="g4 grid" style="margin-top:12px">
+<label>Media<select id="rM"><option></option><option value="ok">(T5,1+T5,2+T5,3+T5,4)/4</option><option>Somma dei tempi</option></select></label>
+<label>Periodo<select id="rT"><option></option><option value="ok">T=T5 medio/5</option><option>T=5·T5 medio</option></select></label>
+<label>Velocità<select id="rV"><option></option><option>vA=a/T</option><option value="ok">vA=2πa/T</option><option>vA=2πT/a</option></select></label>
+</div>
+<button class="primary" onclick="checkT()">Controlla il punto 2</button><div id="tfb" class="feedback"></div></section>
+
+<section class="sheet"><h2>Modelli per la tabella delle energie</h2><div class="g4 grid">
+<label>Uel<select id="f1"><option></option><option>kx</option><option value="ok">½kx²</option><option>mgh</option></select></label>
+<label>Ug<select id="f2"><option></option><option value="ok">mgh</option><option>½mv²</option><option>kh</option></select></label>
+<label>Ec<select id="f3"><option></option><option value="ok">½mv²</option><option>mv</option><option>mgh</option></select></label>
+<label>Em<select id="f4"><option></option><option value="ok">Uel+Ug+Ec</option><option>Uel+Ug</option></select></label>
+</div>
+<label style="display:block;margin-top:12px">Geometria<select id="fg"><option></option><option value="ok">xT=ΔL−a; xA=ΔL; xB=ΔL+a; hT=2a; hA=a; hB=0</option><option>x uguale nei tre punti</option><option>hT=0; hA=a; hB=2a</option></select></label>
+<button class="primary" onclick="models()">Controlla i modelli</button><div id="mfb" class="feedback"></div></section>
+
+<section class="sheet"><h2>3) Determinazione delle energie in gioco</h2>
+<div style="overflow-x:auto"><table><thead><tr><th rowspan="2">Punto</th>
+<th colspan="2">x (m)</th><th colspan="2">Uel (J)</th><th colspan="2">v (m/s)</th><th colspan="2">Ec (J)</th><th colspan="2">h (m)</th><th colspan="2">Ug (J)</th><th colspan="2">Em (J)</th></tr>
+<tr><th>val</th><th>ε</th><th>val</th><th>ε</th><th>val</th><th>ε</th><th>val</th><th>ε</th><th>val</th><th>ε</th><th>val</th><th>ε</th><th>val</th><th>ε</th></tr></thead>
+<tbody id="energyBody"></tbody></table></div>
+<div class="g4 grid" style="margin-top:12px">
+<label>Uel T<select id="e1"><option></option><option value="ok">½k·xT²</option><option>k·xT</option></select></label>
+<label>Ug T<select id="e2"><option></option><option value="ok">mghT</option><option>½mvT²</option></select></label>
+<label>Uel A<select id="e3"><option></option><option value="ok">½k·xA²</option><option>k·xA</option></select></label>
+<label>Ec A<select id="e4"><option></option><option value="ok">½m·vA²</option><option>m·vA</option></select></label>
+<label>Ug A<select id="e5"><option></option><option value="ok">mghA</option><option>½mvA²</option></select></label>
+<label>Uel B<select id="e6"><option></option><option value="ok">½k·xB²</option><option>k·xB</option></select></label>
+<label>Em<select id="e7"><option></option><option value="ok">Uel+Ug+Ec</option><option>solo energie non nulle</option></select></label>
+</div>
+<button class="primary" onclick="checkE()">Controlla la tabella</button><div id="efb" class="feedback"></div></section>
+
+<section class="sheet"><h2>4) Rappresentazione di Ec, Uel, Ug, Em</h2>
+<label>Che cosa metti sull'asse x?<select id="xsel"><option></option><option>Numero della misura</option><option>Tempo di 5 oscillazioni</option><option value="ok">Le posizioni B, T, A</option><option>Energia meccanica</option></select></label>
+<button class="primary" onclick="graphChoice()">Controlla</button><div id="gfb" class="feedback"></div>
+<div class="legend"><span><i class="dot" style="background:var(--blue)"></i>Ec</span><span><i class="dot" style="background:var(--red)"></i>Uel</span><span><i class="dot" style="background:var(--green)"></i>Ug</span><span><i class="dot" style="background:var(--violet)"></i>Em</span></div>
+<div id="chartWrap"><div class="feedback">Il grafico appare dopo la validazione.</div></div></section>
+
+<section class="sheet"><h2>Conclusioni</h2>
+<label>Prima del giudizio del tutor<select id="judge"><option></option><option value="yes">I valori di Em sono compatibili entro le incertezze</option><option value="no">I valori di Em non sono compatibili entro le incertezze</option></select></label>
+<button class="primary" onclick="assess()">Valuta la conservazione</button><div id="afb" class="feedback"></div></section>
+
+<section class="sheet"><h2>Esportazione della relazione</h2>
+<button class="primary" onclick="window.print()">Esporta relazione in PDF</button>
+<button class="secondary" onclick="csv()">Esporta dati CSV</button>
+<div class="feedback">Per il PDF scegli <b>Salva come PDF</b> nella finestra di stampa.</div></section>
+</main>
+
+<script>
+const g=9.81,S={k:false,t:false,m:false,e:false,g:false,data:null,fit:null},$=id=>document.getElementById(id),n=id=>parseFloat($(id).value.replace(',','.')),r=id=>$(id).value.trim().replace(',','.');
+$('tbtime').innerHTML=[1,2,3,4].map(i=>`<tr><th>${i}</th><td><input class="t5"></td><td><input class="et5"></td></tr>`).join('');
+function er(x){x=Math.abs(x);if(!x)return 0;let p=Math.floor(Math.log10(x));return Math.round(x/10**p)*10**p}
+function dec(s){return (String(s).split('.')[1]||'').length}
+function sig1(s){let x=Math.abs(Number(s));if(!x)return false;let p=Math.floor(Math.log10(x)),m=x/10**p;return Math.abs(m-Math.round(m))<1e-8}
+function pair(v,e){return !isNaN(Number(v))&&!isNaN(Number(e))&&sig1(e)&&dec(v)===Math.max(0,-Math.floor(Math.log10(Math.abs(Number(e)))))}
+function close(a,b,t=.04){return Math.abs(a-b)<=t*Math.max(1e-6,Math.abs(a),Math.abs(b))}
+function fb(id,ok,msg){$(id).innerHTML=`<span class="${ok?'ok':'bad'}">${ok?'Corretto.':'Controlla.'}</span> ${msg||''}`}
+function checkZeros(){let ok=document.querySelector('[name=zg]:checked')?.value==='B'&&document.querySelector('[name=ze]:checked')?.value==='E';fb('zeroFB',ok,ok?'In B: Ug=0; in E: Uel=0.':'Rivedi i riferimenti.')}
+function checkK(){let ok=['m','LE','Lx','dL','P','k'].every((id,i)=>pair(r(id),r(['em','eLE','eLx','edL','eP','ek'][i])))&&['rDL','rP','rK'].every(id=>$(id).value==='ok');if(ok){let dl=n('Lx')-n('LE'),ed=n('eLx')+n('eLE'),P=n('m')*g,eP=n('em')*g,k=P/dl,ek=k*(eP/P+ed/dl);ok=close(n('dL'),dl)&&close(n('edL'),ed,.12)&&close(n('P'),P)&&close(n('k'),k)&&close(n('ek'),er(ek),.3);S.K={m:n('m'),em:n('em'),dl,ed,k,ek}}S.k=ok;fb('kfb',ok,ok?'Dati e risultati coerenti.':'Controlla dati, errori, relazioni e risultati.')}
+function checkT(){let ts=[...document.querySelectorAll('.t5')].map(x=>+x.value.replace(',','.')),es=[...document.querySelectorAll('.et5')].map(x=>+x.value.replace(',','.'));let ok=ts.every(Number.isFinite)&&es.every(Number.isFinite)&&['rM','rT','rV'].every(id=>$(id).value==='ok')&&['tm','T','a','vA'].every((id,i)=>pair(r(id),r(['etm','eT','ea','evA'][i])));if(ok){let tm=ts.reduce((a,b)=>a+b,0)/4,etm=Math.max(...es),T=tm/5,eT=etm/5,a=n('a'),ea=n('ea'),v=2*Math.PI*a/T,ev=v*(ea/a+eT/T);ok=close(n('tm'),tm)&&close(n('T'),T)&&close(n('vA'),v)&&close(n('evA'),er(ev),.3);S.T={T,eT,a,ea,v,ev}}S.t=ok;fb('tfb',ok,ok?'Misure e calcoli coerenti.':'Controlla tempi, errori e relazioni.')}
+function models(){S.m=['f1','f2','f3','f4','fg'].every(id=>$(id).value==='ok');fb('mfb',S.m,S.m?'Puoi compilare la tabella.':'Rivedi almeno una relazione.')}
+function row(p,zv=false,zh=false){let z=`<input value="0" readonly>`;return `<tr><th>${p}</th><td><input id="x${p}"></td><td><input id="ex${p}"></td><td><input id="u${p}"></td><td><input id="eu${p}"></td><td>${zv?z:`<input id="v${p}">`}</td><td>${zv?z:`<input id="ev${p}">`}</td><td>${zv?z:`<input id="c${p}">`}</td><td>${zv?z:`<input id="ec${p}">`}</td><td>${zh?z:`<input id="h${p}">`}</td><td>${zh?z:`<input id="eh${p}">`}</td><td>${zh?z:`<input id="q${p}">`}</td><td>${zh?z:`<input id="eq${p}">`}</td><td><input id="M${p}"></td><td><input id="eM${p}"></td></tr>`}
+$('energyBody').innerHTML=row('T',true,false)+row('A',false,false)+row('B',true,true);
+function checkE(){if(!(S.k&&S.t&&S.m)){fb('efb',false,'Completa prima i passaggi precedenti.');return}let K=S.K,T=S.T,pts={T:{x:K.dl-T.a,ex:K.ed+T.ea,h:2*T.a,eh:2*T.ea,v:0,ev:0},A:{x:K.dl,ex:K.ed,h:T.a,eh:T.ea,v:T.v,ev:T.ev},B:{x:K.dl+T.a,ex:K.ed+T.ea,h:0,eh:0,v:0,ev:0}};for(let p of Object.values(pts)){p.u=.5*K.k*p.x*p.x;p.eu=p.u*(K.ek/K.k+2*p.ex/Math.abs(p.x));p.q=K.m*g*p.h;p.eq=p.h?p.q*(K.em/K.m+p.eh/p.h):0;p.c=.5*K.m*p.v*p.v;p.ec=p.v?p.c*(K.em/K.m+2*p.ev/p.v):0;p.M=p.u+p.q+p.c;p.eM=p.eu+p.eq+p.ec}let ok=['e1','e2','e3','e4','e5','e6','e7'].every(id=>$(id).value==='ok');for(let p of ['T','A','B']){let q=pts[p],fields=[['x',q.x,q.ex],['u',q.u,q.eu],['M',q.M,q.eM]];if(p!=='B')fields.push(['h',q.h,q.eh],['q',q.q,q.eq]);if(p==='A')fields.push(['v',q.v,q.ev],['c',q.c,q.ec]);for(let [id,v,e] of fields)ok=ok&&pair(r(id+p),r('e'+id+p))&&close(n(id+p),v)&&close(n('e'+id+p),er(e),.35)}S.e=ok;if(ok)S.data={T:{Ec:{v:0,e:0},U:{v:n('uT'),e:n('euT')},G:{v:n('qT'),e:n('eqT')},M:{v:n('MT'),e:n('eMT')}},A:{Ec:{v:n('cA'),e:n('ecA')},U:{v:n('uA'),e:n('euA')},G:{v:n('qA'),e:n('eqA')},M:{v:n('MA'),e:n('eMA')}},B:{Ec:{v:0,e:0},U:{v:n('uB'),e:n('euB')},G:{v:0,e:0},M:{v:n('MB'),e:n('eMB')}}};fb('efb',ok,ok?'Tabella coerente.':'Controlla valori, errori e relazioni.');if(ok&&S.g)draw()}
+function graphChoice(){S.g=$('xsel').value==='ok';fb('gfb',S.g,S.g?'Confrontiamo le energie nelle tre posizioni.':'Scegli le posizioni B, T, A.');if(S.g&&S.e)draw()}
+function fit(y){let sx=3,sy=y.reduce((a,b)=>a+b,0),sxy=y[1]+2*y[2],m=(3*sxy-sx*sy)/(15-9),q=(sy-m*sx)/3;return{m,q}}
+function draw(){let D=S.data,N=['B','A','T'],C={Ec:'#2563eb',U:'#dc2626',G:'#16a34a',M:'#7c3aed'},ser=['Ec','U','G','M'],F=fit(N.map(p=>D[p].M.v));S.fit=F;let ym=0;N.forEach(p=>ser.forEach(s=>ym=Math.max(ym,D[p][s].v+D[p][s].e)));ym*=1.18;let W=900,H=470,L=75,R=25,Top=30,Bot=70,pw=W-L-R,ph=H-Top-Bot,x=i=>L+90+(pw-180)*i/2,y=v=>Top+ph*(1-v/ym),off={Ec:-24,U:-8,G:8,M:24};let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><line x1="${L}" y1="${Top}" x2="${L}" y2="${H-Bot}" stroke="#334155"/><line x1="${L}" y1="${H-Bot}" x2="${W-R}" y2="${H-Bot}" stroke="#334155"/>`;for(let i=0;i<=5;i++){let v=ym*i/5,yy=y(v);s+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e2e8f0"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="12">${v.toFixed(3)}</text>`}N.forEach((p,i)=>{s+=`<text x="${x(i)}" y="${H-Bot+25}" text-anchor="middle">${p}</text>`;ser.forEach(k=>{let d=D[p][k],xx=x(i)+off[k],yt=y(d.v+d.e),yb=y(Math.max(0,d.v-d.e)),yy=y(d.v),c=C[k];s+=`<line x1="${xx}" y1="${yt}" x2="${xx}" y2="${yb}" stroke="${c}" stroke-width="2"/><circle cx="${xx}" cy="${yy}" r="5" fill="${c}"/>`})});s+=`<line x1="${x(0)+24}" y1="${y(F.q)}" x2="${x(2)+24}" y2="${y(F.q+2*F.m)}" stroke="${C.M}" stroke-width="2.5" stroke-dasharray="8 6"/><text x="${W-R}" y="${Top+16}" text-anchor="end" font-size="12" fill="${C.M}">Best fit Em: m=${F.m.toExponential(2)} J/posizione</text><text x="${(L+W-R)/2}" y="${H-15}" text-anchor="middle">Posizioni della massa</text><text transform="translate(18 ${(Top+H-Bot)/2}) rotate(-90)" text-anchor="middle">Energia (J)</text></svg>`;$('chartWrap').innerHTML=s+`<div class="feedback">Una retta di best fit quasi orizzontale suggerisce costanza di Em; verifica anche la compatibilità delle barre di errore.</div>`}
+function assess(){if(!S.e){fb('afb',false,'Valida prima la tabella.');return}let I=['T','A','B'].map(p=>[S.data[p].M.v-S.data[p].M.e,S.data[p].M.v+S.data[p].M.e]),lo=Math.max(...I.map(x=>x[0])),hi=Math.min(...I.map(x=>x[1])),comp=lo<=hi,j=$('judge').value,ok=(j==='yes'&&comp)||(j==='no'&&!comp);fb('afb',ok,(comp?'Gli intervalli Em±ε(Em) hanno una zona comune: dati compatibili con la conservazione.':'Gli intervalli non hanno una zona comune: i dati non risultano compatibili con la conservazione.')+(S.fit?` Pendenza best fit: ${S.fit.m.toExponential(2)} J/posizione.`:''))}
+function csv(){let rows=[['Sezione','Campo','Valore','Unità'],['Identificazione','Nome',$('studentNames').value,''],['Identificazione','Classe',$('studentClass').value,''],['Identificazione','Gruppo',$('studentGroup').value,''],['Identificazione','Data',$('studentDate').value,'']];[['m','kg'],['em','kg'],['LE','m'],['eLE','m'],['Lx','m'],['eLx','m'],['dL','m'],['edL','m'],['P','N'],['eP','N'],['k','N/m'],['ek','N/m'],['tm','s'],['etm','s'],['T','s'],['eT','s'],['a','m'],['ea','m'],['vA','m/s'],['evA','m/s']].forEach(([id,u])=>rows.push(['Dati',id,$(id).value,u]));for(let p of ['T','A','B'])for(let q of ['x','ex','u','eu','v','ev','c','ec','h','eh','q','eq','M','eM']){let el=$(q+p);if(el)rows.push(['Energia',q+p,el.value,''])}let esc=v=>/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v,c=rows.map(r=>r.map(x=>esc(String(x??''))).join(';')).join('\n'),b=new Blob(['\ufeff'+c],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`energia_meccanica_${$('studentGroup').value||'gruppo'}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+</script>
+</body></html>
