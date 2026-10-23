@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Resistenza elettrica e caratteristiche del conduttore</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f5f7fb}
+#app{border:0;width:100%;height:100%;display:block}
+</style>
+</head>
+<body>
+<iframe id="app" src="index.html" title="Laboratorio resistenza elettrica"></iframe>
+<script>
+const frame=document.getElementById('app');
+frame.addEventListener('load',()=>{
+  try{
+    const d=frame.contentDocument;
+    if(d.querySelector('script[data-backend="report"]')) return;
+    const s=d.createElement('script');
+    s.src='backend.js';
+    s.dataset.backend='report';
+    d.body.appendChild(s);
+  }catch(e){
+    console.error('Impossibile attivare il modulo di consegna',e);
+  }
+});
+</script>
+</body>
+</html>
