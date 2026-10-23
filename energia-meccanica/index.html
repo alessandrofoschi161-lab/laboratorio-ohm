@@ -104,7 +104,6 @@
 <button class="primary" onclick="window.print()">Esporta relazione in PDF</button>
 <button class="secondary" onclick="csv()">Esporta dati CSV</button>
 <button class="primary" onclick="sendPDFToDrive()">Invia relazione PDF a Drive</button>
-<button class="secondary" onclick="testDriveUpload()">TEST invio Drive</button>
 <div id="sendStatus" class="feedback">Compila la relazione e, al termine, inviala direttamente alla cartella Drive del docente.</div></section>
 </main>
 
@@ -209,36 +208,5 @@ async function sendPDFToDrive(){
   }
 }
 
-async function testDriveUpload(){
-  const status=$('sendStatus');
-  status.innerHTML='<span class="warn">Test automatico in corso…</span>';
-  try{
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    pdf.setFontSize(18);
-    pdf.text('TEST AUTOMATICO - Energia meccanica',20,30);
-    pdf.setFontSize(12);
-    pdf.text('Questo PDF verifica il collegamento GitHub Pages → Apps Script → Google Drive.',20,45,{maxWidth:170});
-    pdf.text('Data test: '+new Date().toLocaleString('it-IT'),20,65);
-    const pdfBase64=pdf.output('datauristring').split(',')[1];
-    const payload={
-      nome:'TEST_AUTOMATICO',
-      classe:'3TEST',
-      gruppo:'AUTO',
-      data:new Date().toISOString().slice(0,10),
-      pdfBase64
-    };
-    await fetch(DRIVE_WEBAPP_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(payload)
-    });
-    status.innerHTML='<span class="ok">Test inviato.</span> Cerca nella cartella Drive un file con nome simile a <b>Energia_meccanica_3TEST_AUTO_TEST_AUTOMATICO_...</b>.';
-  }catch(err){
-    console.error(err);
-    status.innerHTML='<span class="bad">Test non riuscito.</span> '+String(err);
-  }
-}
 </script>
 </body></html>
