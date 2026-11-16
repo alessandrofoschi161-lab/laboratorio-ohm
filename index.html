@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laboratorio – Relazione tra ΔV e I – Versione 5</title>
+<title>Laboratorio – Relazione tra ΔV e I – Versione 5.1</title>
 <style>
 :root{
   --bg:#f5f7fb; --card:#fff; --ink:#14213d; --muted:#667085;
@@ -57,6 +57,8 @@ canvas{width:100%;max-width:920px;height:500px;border:1px solid #cbd5e1;border-r
 .choice label{font-weight:600;margin:0}
 .modelbox{margin-top:14px;padding:14px;border:1px dashed #94a3b8;border-radius:12px;background:#f8fafc}
 footer{text-align:center;color:#64748b;font-size:13px;padding:16px}
+.receipt-link{display:inline-block;margin-top:12px;padding:9px 12px;border:1px solid #0f766e;border-radius:8px;color:#0f766e;font-weight:700;text-decoration:none}
+.receipt-link[hidden]{display:none}
 .data-ok{background:#dcfce7!important;border-color:#22c55e!important}
 .data-bad{background:#fee2e2!important;border-color:#ef4444!important}
 .validation{font-size:11px;margin-top:3px;line-height:1.2;color:#b91c1c;max-width:135px}
@@ -76,7 +78,7 @@ footer{text-align:center;color:#64748b;font-size:13px;padding:16px}
 <header>
   <div class="wrap">
     <h1>Laboratorio di fisica – Relazione tra ΔV e I</h1>
-    <div class="subtitle">Tutor investigativo autonomo – Versione 5</div>
+    <div class="subtitle">Tutor investigativo autonomo – Versione 5.1</div>
     <div class="progress"><span id="progressBar"></span></div>
   </div>
 </header>
@@ -248,7 +250,7 @@ footer{text-align:center;color:#64748b;font-size:13px;padding:16px}
 
     <div class="delivery">
       <h3>Consegna automatica</h3>
-      <p class="small">Verranno inviati: identificazione del gruppo, dati sperimentali, incertezze, grafici, modello matematico e risposte conclusive. Il sistema creerà automaticamente un PDF nella cartella Google Drive del docente.</p>
+      <p class="small">Verranno inviati: identificazione del gruppo, dati sperimentali, incertezze, grafici, modello matematico e risposte conclusive. Il sistema creerà automaticamente un PDF nella cartella Google Drive del docente. La consegna è confermata soltanto dalla ricevuta Google aperta in una nuova scheda.</p>
       <div class="grid">
         <div>
           <label>Conferma classe</label>
@@ -412,34 +414,55 @@ function getReportPayload(){return {
  osservazioneRapporti:$('ratioObs').value,modelloMatematico:$('modelEquation').value,significatoPendenza:$('meaning').value,tensioneElevata:$('highV').value,
  graficoSperimentale:$('graph').toDataURL('image/png'),graficoFit:$('fitGraph').toDataURL('image/png')};}
 function setDeliveryStatus(kind,text){const e=$('deliveryStatus');e.className='delivery-status show '+kind;e.textContent=text;}
-function jsonpStatus(requestId){return new Promise((resolve,reject)=>{
- const cb='ohmStatus_'+Math.random().toString(36).slice(2);const script=document.createElement('script');
- const cleanup=()=>{delete window[cb];script.remove();clearTimeout(timer);};
- const timer=setTimeout(()=>{cleanup();reject(Error('Nessuna risposta di conferma dal server.'));},8500);
- window[cb]=data=>{cleanup();resolve(data);};script.onerror=()=>{cleanup();reject(Error('Impossibile verificare lo stato della consegna.'));};
- script.src=APPS_SCRIPT_URL+'?action=status&id='+encodeURIComponent(requestId)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();document.body.appendChild(script);
-});}
-async function submitReport(){
+// La ricevuta viene mostrata dal server Google in una nuova scheda.
+// Non ci affidiamo a JSONP, CORS o iframe incorporati, che possono fallire
+// in base alle restrizioni del browser e della piattaforma.
+function sendToReceiptTab(payload){
+ const form=document.createElement('form');
+ form.method='POST';
+ form.action=APPS_SCRIPT_URL;
+ form.target='_blank';
+ form.acceptCharset='UTF-8';
+ form.style.display='none';
+ const field=document.createElement('input');
+ field.type='hidden';field.name='payload';field.value=JSON.stringify(payload);
+ form.appendChild(field);document.body.appendChild(form);
+ try{form.submit();}finally{form.remove();}
+}
+function receiptUrl(requestId){
+ return APPS_SCRIPT_URL+'?action=receipt&id='+encodeURIComponent(requestId);
+}
+function showReceiptLink(requestId){
+ let link=$('receiptLink');
+ if(!link){
+  link=document.createElement('a');link.id='receiptLink';
+  link.target='_blank';link.rel='noopener noreferrer';
+  link.className='receipt-link';
+  link.textContent='Apri / verifica la ricevuta su Google';
+  $('deliveryStatus').insertAdjacentElement('afterend',link);
+ }
+ link.href=receiptUrl(requestId);link.hidden=false;
+}
+function submitReport(){
  if(!analysis.valid||!completed){setDeliveryStatus('err','Completa il percorso e valida prima i dati.');return;}
  if(!$('deliveryConfirm').checked){setDeliveryStatus('err','Conferma i dati definitivi del gruppo.');return;}
- if(!$('student').value.trim()||!$('classe').value.trim()||!$('gruppo').value.trim()||$('deliveryClass').value.trim()!==$('classe').value.trim()||$('deliveryGroup').value.trim()!==$('gruppo').value.trim()){setDeliveryStatus('err','Controlla nomi, classe e gruppo.');return;}
- const btn=$('sendBtn');btn.disabled=true;
+ if(!$('student').value.trim()||!$('classe').value.trim()||!$('gruppo').value.trim()||$('deliveryClass').value.trim()!==$('classe').value.trim()||$('deliveryGroup').value.trim()!==$('gruppo').value.trim()){
+  setDeliveryStatus('err','Controlla nomi, classe e gruppo.');return;
+ }
  const pendingKey='ohm-lab-v5-pending';let requestId;
- try{requestId=localStorage.getItem(pendingKey)||('ohm_'+Array.from(crypto.getRandomValues(new Uint32Array(4))).map(n=>n.toString(16)).join(''));localStorage.setItem(pendingKey,requestId);}catch(e){requestId='ohm_'+Date.now()+'_'+Math.random().toString(36).slice(2);}
- const payload=getReportPayload();payload.requestId=requestId;
- setDeliveryStatus('wait','Invio in corso. Non chiudere la pagina: aspetto la conferma di creazione del PDF.');
  try{
-  await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
-  let status=null;
-  for(let attempt=0;attempt<12;attempt++){
-   try{status=await jsonpStatus(requestId);}catch(e){status=null;}
-   if(status?.status==='ok'){setDeliveryStatus('ok','Consegna verificata: il PDF è stato creato su Drive. '+(status.file||''));localStorage.removeItem(pendingKey);btn.textContent='Relazione consegnata';saveState();return;}
-   if(status?.status==='error')throw Error(status.message||'Errore nel backend');
-   await new Promise(r=>setTimeout(r,1500));
-  }
-  setDeliveryStatus('err','Conferma non ricevuta. NON considerare consegnata la relazione. I dati sono conservati nel browser; controlla Drive o riprova.');
- }catch(e){setDeliveryStatus('err','Consegna non verificata: '+e.message+'. I dati restano salvati localmente.');}
- finally{btn.disabled=false;}
+  requestId=localStorage.getItem(pendingKey)||('ohm_'+Array.from(crypto.getRandomValues(new Uint32Array(4))).map(n=>n.toString(16)).join(''));
+  localStorage.setItem(pendingKey,requestId);
+ }catch(e){requestId='ohm_'+Date.now()+'_'+Math.random().toString(36).slice(2);}
+ const payload=getReportPayload();payload.requestId=requestId;
+ try{
+  // Il browser apre una scheda separata. La ricevuta positiva viene prodotta
+  // soltanto DOPO che Apps Script ha creato il PDF su Drive.
+  sendToReceiptTab(payload);
+  showReceiptLink(requestId);
+  setDeliveryStatus('wait','Consegna avviata: controlla la NUOVA scheda Google. La relazione è consegnata solo se compare “RICEVUTA CONFERMATA” con il nome del PDF. Questa scheda conserva tutti i dati.');
+  saveState();
+ }catch(e){setDeliveryStatus('err','Impossibile aprire la ricevuta: '+e.message+'. I dati sono conservati nel browser.');}
 }
 function exportCSV(){const d=getReportPayload(),rows=[['Prova','ΔV (V)','εΔV (V)','I (A)','εI (A)','R (Ω)'],...d.dati.map(r=>[r.prova,r.V,r.eV,r.I,r.eI,r.k])];
  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const a=document.createElement('a'),u=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=u;a.download='ohm_dati_v5.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),3000);}
