@@ -128,13 +128,24 @@ function validateMeasure(valueEl,errorEl,show=true){
   if(sigDigits(es)!==1){
     if(show){
       setFieldState(valueEl,'pending','L’errore deve essere corretto prima di verificare la misura.');
-      setFieldState(errorEl,'invalid','L’errore assoluto deve avere una sola cifra significativa.');
+      setFieldState(errorEl,'invalid','L’errore assoluto deve avere una sola cifra significativa (per esempio 0,02 A, non 0,025 A).');
     }
     return false;
   }
 
   const de=uncertaintyDecimals(e);
   const dv=decimalsText(vs);
+  const deText=decimalsText(es);
+  if(deText===null){
+    if(show){setFieldState(errorEl,'invalid','Scrivi l’incertezza in forma decimale, non in notazione scientifica.');setFieldState(valueEl,'pending','Controlla prima l’incertezza.');}
+    return false;
+  }
+  // Se la cifra significativa iniziale è preceduta da zeri, gli zeri iniziali
+  // non contano; gli zeri finali scritti dopo la virgola contano invece.
+  if(deText!==de){
+    if(show){setFieldState(errorEl,'invalid','L’incertezza deve terminare nella posizione della sua unica cifra significativa: togli eventuali zeri finali superflui.');setFieldState(valueEl,'pending','Controlla prima l’incertezza.');}
+    return false;
+  }
 
   if(dv===null){
     if(show){
@@ -153,7 +164,7 @@ function validateMeasure(valueEl,errorEl,show=true){
     else posizione=`con ${de} cifre decimali`;
     if(show){
       setFieldState(errorEl,'valid');
-      setFieldState(valueEl,'invalid',`Il valore deve essere scritto ${posizione}, come richiede l’errore ${es}.`);
+      setFieldState(valueEl,'invalid',`Il valore deve essere scritto ${posizione}, come richiede l’errore ${es}. Mantieni gli zeri finali necessari.`);
     }
     return false;
   }
